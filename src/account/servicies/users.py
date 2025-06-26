@@ -6,19 +6,19 @@ from account.schemas import UserResponseSchema, UserUpdateSchema
 users = [
     {
         "id": 1,
-        "email": "string",
+        "email": "posv@mail.ru",
         "last_name": "string",
         "date_of_birth": "2025-06-22T07:16:11.323Z",
     },
     {
         "id": 2,
-        "email": "string",
+        "email": "test@mail.ru",
         "first_name": "string",
         "date_of_birth": "2025-06-22T07:16:11.323Z",
     },
     {
         "id": 3,
-        "email": "string",
+        "email": "test_2@mail.ru",
         "first_name": "string",
         "last_name": "string",
     },
