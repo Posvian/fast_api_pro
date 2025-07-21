@@ -255,3 +255,4 @@ fabric.properties
 
 .DS_Store
 .env.desktop
+/alembic.ini
