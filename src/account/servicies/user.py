@@ -1,0 +1,47 @@
+from datetime import datetime
+from typing import Sequence
+from fastapi import HTTPException, status
+
+from fastapi.exceptions import ValidationException
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from account.repositories.user import UserRepository
+from account.schemas import UserCreateSchema, UserUpdateSchema
+from src.account.models import User
+
+
+class UserService:
+    def __init__(self, session: AsyncSession):
+        self.session = session
+        self.repository = UserRepository(session=session)
+
+    async def get_all(self) -> Sequence[User]:
+        return await self.repository.get_all()
+
+    async def check_exist(self, email):
+        if await self.repository.get_by_email(email=email):
+            raise HTTPException(
+                detail="Пользователь с таким майлом уже существует",
+                status_code=status.HTTP_409_CONFLICT,
+            )
+
+    async def create(self, user_schema: UserCreateSchema):
+        await self.check_exist(email=user_schema.email)
+        return await self.repository.create(user_schema=user_schema)
+
+    async def get_by_id(self, user_id: int) -> User:
+        user = await self.repository.get_by_id(user_id=user_id)
+        if not user:
+            raise HTTPException(
+                detail="Такого пользователя не существует",
+                status_code=status.HTTP_404_NOT_FOUND,
+            )
+        return user
+
+    async def update_user(self, user_id: int, user_schema: UserUpdateSchema):
+        user = await self.get_by_id(user_id=user_id)
+        return await self.repository.update(user=user, user_schema=user_schema)
+
+    async def delete(self, user_id: int):
+        user = await self.get_by_id(user_id=user_id)
+        await self.repository.delete(user=user)
