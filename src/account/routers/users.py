@@ -1,28 +1,48 @@
 from datetime import datetime
 from typing import Union
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, status, Depends
 from fastapi.exceptions import ValidationException, ResponseValidationError
 
+from account.dependencies.user import get_user_service
 from account.schemas import UserCreateSchema, UserResponseSchema, UserUpdateSchema
+from account.schemas.users import BaseUserSchema
 from account.servicies import UserService
 
 router = APIRouter(prefix="/users", tags=["ACCOUNT"])
 
 
-@router.post("/", response_model=UserCreateSchema, description="Создание пользователя")
-def create_user_handler(payload: UserCreateSchema):
-    return payload
-
-
 @router.get(
     "/",
     response_model=list[UserResponseSchema],
+    status_code=status.HTTP_200_OK,
     description="Получение списка пользователей",
 )
-def get_users_handler():
-    user_service = UserService()
-    return user_service.get_user_list()
+async def get_users_handler(user_service: UserService = Depends(get_user_service)):
+    return await user_service.get_all()
+
+
+@router.get(
+    "/{user_id}",
+    response_model=UserResponseSchema,
+    description="Получение пользователя",
+)
+async def get_user_by_id_handler(
+    user_id: int, user_service: UserService = Depends(get_user_service)
+):
+    return await user_service.get_by_id(user_id=user_id)
+
+
+@router.post(
+    "/",
+    response_model=UserCreateSchema,
+    status_code=status.HTTP_201_CREATED,
+    description="Создание пользователя",
+)
+async def create_user_handler(
+    payload: UserCreateSchema, user_service: UserService = Depends(get_user_service)
+):
+    return await user_service.create(user_schema=payload)
 
 
 @router.put(
@@ -30,29 +50,70 @@ def get_users_handler():
     response_model=UserUpdateSchema,
     description="Обновление данных пользователя",
 )
-def update_user_handler(
-    user_id: int, first_name: str, last_name: str, date_of_birth: datetime
+async def update_user_handler(
+    user_id: int,
+    payload: UserUpdateSchema,
+    user_service: UserService = Depends(get_user_service),
 ):
-    user_service = UserService()
-    return user_service.update_user(
-        user_id=user_id,
-        first_name=first_name,
-        last_name=last_name,
-        date_of_birth=date_of_birth,
-    )
+    return await user_service.update_user(user_id=user_id, user_schema=payload)
 
 
 @router.delete(
-    "/{user_id}", response_model=UserResponseSchema, description="Удаление пользователя"
+    "/{user_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    description="Удаление пользователя",
 )
-def delete_user_handler(user_id: int):
-    user_service = UserService()
+async def delete_user_handler(
+    user_id: int, user_service: UserService = Depends(get_user_service)
+):
+    return await user_service.delete(user_id=user_id)
 
-    try:
-        deleted_user = user_service.delete_user(user_id)
-    except ValidationException:
-        return HTTPException(
-            status_code=404, detail=f"Пользователь {user_id} не найден"
-        )
-    else:
-        return deleted_user
+
+#
+#
+# @router.post("/", response_model=UserCreateSchema, description="Создание пользователя")
+# def create_user_handler(payload: UserCreateSchema):
+#     return payload
+#
+#
+# @router.get(
+#     "/",
+#     response_model=list[UserResponseSchema],
+#     description="Получение списка пользователей",
+# )
+# def get_users_handler():
+#     user_service = UserService()
+#     return user_service.get_user_list()
+#
+#
+# @router.put(
+#     "/{user_id}",
+#     response_model=UserUpdateSchema,
+#     description="Обновление данных пользователя",
+# )
+# def update_user_handler(
+#     user_id: int, first_name: str, last_name: str, date_of_birth: datetime
+# ):
+#     user_service = UserService()
+#     return user_service.update_user(
+#         user_id=user_id,
+#         first_name=first_name,
+#         last_name=last_name,
+#         date_of_birth=date_of_birth,
+#     )
+#
+#
+# @router.delete(
+#     "/{user_id}", response_model=UserResponseSchema, description="Удаление пользователя"
+# )
+# def delete_user_handler(user_id: int):
+#     user_service = UserService()
+#
+#     try:
+#         deleted_user = user_service.delete_user(user_id)
+#     except ValidationException:
+#         return HTTPException(
+#             status_code=404, detail=f"Пользователь {user_id} не найден"
+#         )
+#     else:
+#         return deleted_user
