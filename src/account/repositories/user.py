@@ -6,7 +6,7 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from account.schemas import UserCreateSchema, UserUpdateSchema
+from account.schemas import UserCreateSchema, UserUpdateSchema, UserPartialUpdateSchema
 from src.account.models import User
 
 
@@ -44,6 +44,16 @@ class UserRepository:
     async def update(self, user: User, user_schema: UserUpdateSchema) -> User:
         user.first_name = user_schema.first_name
         user.last_name = user_schema.last_name
+        await self.session.commit()
+        await self.session.flush()
+        return user
+
+    async def partial_update(
+        self, user: User, user_schema: UserPartialUpdateSchema
+    ) -> User:
+        for name, value in user_schema.model_dump().items():
+            if value is not None:
+                setattr(user, name, value)
         await self.session.commit()
         await self.session.flush()
         return user
