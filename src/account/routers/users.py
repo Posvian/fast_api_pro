@@ -5,8 +5,12 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from fastapi.exceptions import ValidationException, ResponseValidationError
 
 from account.dependencies.user import get_user_service
-from account.schemas import UserCreateSchema, UserResponseSchema, UserUpdateSchema
-from account.schemas.users import BaseUserSchema
+from account.schemas import (
+    UserCreateSchema,
+    UserResponseSchema,
+    UserUpdateSchema,
+    UserPartialUpdateSchema,
+)
 from account.servicies import UserService
 
 router = APIRouter(prefix="/users", tags=["ACCOUNT"])
@@ -56,6 +60,19 @@ async def update_user_handler(
     user_service: UserService = Depends(get_user_service),
 ):
     return await user_service.update_user(user_id=user_id, user_schema=payload)
+
+
+@router.patch(
+    "/{user_id}",
+    response_model=UserPartialUpdateSchema,
+    description="Частичное обновление данных пользователя",
+)
+async def partial_update_user_handler(
+    user_id: int,
+    payload: UserPartialUpdateSchema,
+    user_service: UserService = Depends(get_user_service),
+):
+    return await user_service.partial_update_user(user_id=user_id, user_schema=payload)
 
 
 @router.delete(
