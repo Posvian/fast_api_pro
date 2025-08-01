@@ -6,7 +6,7 @@ from fastapi.exceptions import ValidationException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from account.repositories.user import UserRepository
-from account.schemas import UserCreateSchema, UserUpdateSchema
+from account.schemas import UserCreateSchema, UserUpdateSchema, UserPartialUpdateSchema
 from src.account.models import User
 
 
@@ -41,6 +41,12 @@ class UserService:
     async def update_user(self, user_id: int, user_schema: UserUpdateSchema):
         user = await self.get_by_id(user_id=user_id)
         return await self.repository.update(user=user, user_schema=user_schema)
+
+    async def partial_update_user(
+        self, user_id: int, user_schema: UserPartialUpdateSchema
+    ):
+        user = await self.get_by_id(user_id=user_id)
+        return await self.repository.partial_update(user=user, user_schema=user_schema)
 
     async def delete(self, user_id: int):
         user = await self.get_by_id(user_id=user_id)
