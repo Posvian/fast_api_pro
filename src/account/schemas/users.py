@@ -33,3 +33,8 @@ class UserResponseSchema(BaseUserSchema):
 class UserUpdateSchema(BaseModel):
     first_name: str
     last_name: str
+
+
+class UserPartialUpdateSchema(BaseModel):
+    first_name: str | None = None
+    last_name: str | None = None
