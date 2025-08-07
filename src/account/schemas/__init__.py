@@ -4,3 +4,8 @@ from .users import (
     UserUpdateSchema,
     UserPartialUpdateSchema,
 )
+
+from .role import (
+    RoleCreateSchema,
+    RoleListSchema,
+)
