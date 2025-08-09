@@ -31,6 +31,8 @@ if config.config_file_name is not None:
 from src.core.orm.base import Base
 from src.account.models import User
 from src.account.models import Role
+from src.permissions.models import Permissions
+from src.permissions.models import PermissionRoleAssociation
 
 target_metadata = Base.metadata
 
