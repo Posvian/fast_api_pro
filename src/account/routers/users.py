@@ -13,7 +13,7 @@ from account.schemas import (
 )
 from account.servicies import UserService
 
-router = APIRouter(prefix="/users", tags=["ACCOUNT"])
+router = APIRouter(prefix="/users", tags=["ACCOUNT/USERS"])
 
 
 @router.get(
@@ -22,8 +22,11 @@ router = APIRouter(prefix="/users", tags=["ACCOUNT"])
     status_code=status.HTTP_200_OK,
     description="Получение списка пользователей",
 )
-async def get_users_handler(user_service: UserService = Depends(get_user_service)):
-    return await user_service.get_all()
+async def get_users_handler(
+    page: int, per_page: int = 10, user_service: UserService = Depends(get_user_service)
+):
+    offset = (page - 1) * per_page
+    return await user_service.get_all(offset=offset, per_page=per_page)
 
 
 @router.get(
@@ -39,39 +42,39 @@ async def get_user_by_id_handler(
 
 @router.post(
     "/",
-    response_model=UserCreateSchema,
+    response_model=UserResponseSchema,
     status_code=status.HTTP_201_CREATED,
     description="Создание пользователя",
 )
 async def create_user_handler(
     payload: UserCreateSchema, user_service: UserService = Depends(get_user_service)
-):
+) -> UserResponseSchema:
     return await user_service.create(user_schema=payload)
 
 
 @router.put(
     "/{user_id}",
-    response_model=UserUpdateSchema,
+    response_model=UserResponseSchema,
     description="Обновление данных пользователя",
 )
 async def update_user_handler(
     user_id: int,
     payload: UserUpdateSchema,
     user_service: UserService = Depends(get_user_service),
-):
+) -> UserResponseSchema:
     return await user_service.update_user(user_id=user_id, user_schema=payload)
 
 
 @router.patch(
     "/{user_id}",
-    response_model=UserPartialUpdateSchema,
+    response_model=UserResponseSchema,
     description="Частичное обновление данных пользователя",
 )
 async def partial_update_user_handler(
     user_id: int,
     payload: UserPartialUpdateSchema,
     user_service: UserService = Depends(get_user_service),
-):
+) -> UserResponseSchema:
     return await user_service.partial_update_user(user_id=user_id, user_schema=payload)
 
 

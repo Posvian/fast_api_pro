@@ -24,5 +24,5 @@ class User(Base):
     is_superuser: Mapped[bool_default_false]
     is_active: Mapped[bool_default_true]
 
-    role_id: Mapped[int | None] = mapped_column(ForeignKey("roles.id"))
+    role_id: Mapped[int | None] = mapped_column(ForeignKey("roles.id"), nullable=True)
     role: Mapped[Optional["Role"]] = relationship(back_populates="users")

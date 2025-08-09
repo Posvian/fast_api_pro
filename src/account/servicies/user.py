@@ -1,12 +1,20 @@
 from datetime import datetime
 from typing import Sequence
+
+from dns.rdata import Rdata
 from fastapi import HTTPException, status
 
 from fastapi.exceptions import ValidationException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from account.repositories.user import UserRepository
-from account.schemas import UserCreateSchema, UserUpdateSchema, UserPartialUpdateSchema
+from account.schemas import (
+    UserCreateSchema,
+    UserUpdateSchema,
+    UserPartialUpdateSchema,
+    UserResponseSchema,
+    RoleListSchema,
+)
 from src.account.models import User
 
 
@@ -15,8 +23,8 @@ class UserService:
         self.session = session
         self.repository = UserRepository(session=session)
 
-    async def get_all(self) -> Sequence[User]:
-        return await self.repository.get_all()
+    async def get_all(self, offset: int, per_page: int) -> Sequence[User]:
+        return await self.repository.get_all(offset=offset, per_page=per_page)
 
     async def check_exist(self, email):
         if await self.repository.get_by_email(email=email):
@@ -27,7 +35,8 @@ class UserService:
 
     async def create(self, user_schema: UserCreateSchema):
         await self.check_exist(email=user_schema.email)
-        return await self.repository.create(user_schema=user_schema)
+        user = await self.repository.create(user_schema=user_schema)
+        return user
 
     async def get_by_id(self, user_id: int) -> User:
         user = await self.repository.get_by_id(user_id=user_id)

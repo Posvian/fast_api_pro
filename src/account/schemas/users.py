@@ -3,6 +3,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
+from .role import RoleListSchema
+
 
 class BaseUserSchema(BaseModel):
     email: EmailStr
@@ -12,6 +14,7 @@ class BaseUserSchema(BaseModel):
 
 class UserCreateSchema(BaseUserSchema):
     password: str
+    role_id: int | None = None
 
     @field_validator("password")
     def validate_password(cls, value) -> str:
@@ -28,13 +31,16 @@ class UserResponseSchema(BaseUserSchema):
     id: int
     is_superuser: bool | None = None
     is_active: bool | None = None
+    role: RoleListSchema | None = None
 
 
 class UserUpdateSchema(BaseModel):
     first_name: str
     last_name: str
+    role_id: int
 
 
 class UserPartialUpdateSchema(BaseModel):
     first_name: str | None = None
     last_name: str | None = None
+    role_id: int | None = None
