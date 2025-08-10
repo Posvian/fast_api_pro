@@ -25,7 +25,7 @@ async def get_user_payload():
 
 @pytest_asyncio.fixture
 async def get_update_user_payload():
-    test_update_first_name = "Test_update"
+    test_update_first_name = "Test-update-name"
     test_update_last_name = "Updated"
     test_update_role_id = 1
     return {
