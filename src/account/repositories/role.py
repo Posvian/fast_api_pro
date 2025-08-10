@@ -1,11 +1,10 @@
 from typing import Sequence
 
-from dns.e164 import query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from account.models import Role
-from account.schemas import RoleCreateSchema
+from src.account.models import Role
+from src.account.schemas import RoleCreateSchema
 
 
 class RoleRepository:
@@ -34,6 +33,7 @@ class RoleRepository:
         self.session.add(role)
         await self.session.commit()
         await self.session.flush()
+        await self.session.refresh(role)
 
         return role
 

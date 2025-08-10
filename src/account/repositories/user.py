@@ -7,7 +7,11 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-from account.schemas import UserCreateSchema, UserUpdateSchema, UserPartialUpdateSchema
+from src.account.schemas import (
+    UserCreateSchema,
+    UserUpdateSchema,
+    UserPartialUpdateSchema,
+)
 from src.account.models import User
 
 

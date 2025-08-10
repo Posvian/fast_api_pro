@@ -7,8 +7,8 @@ from fastapi import HTTPException, status
 from fastapi.exceptions import ValidationException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from account.repositories.user import UserRepository
-from account.schemas import (
+from src.account.repositories.user import UserRepository
+from src.account.schemas import (
     UserCreateSchema,
     UserUpdateSchema,
     UserPartialUpdateSchema,

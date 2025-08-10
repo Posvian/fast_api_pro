@@ -3,9 +3,9 @@ from typing import Sequence
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from account.models import Role
-from account.repositories.role import RoleRepository
-from account.schemas import RoleCreateSchema
+from src.account.models import Role
+from src.account.repositories.role import RoleRepository
+from src.account.schemas import RoleCreateSchema
 
 
 class RoleService:

@@ -4,14 +4,14 @@ from typing import Union
 from fastapi import APIRouter, HTTPException, status, Depends
 from fastapi.exceptions import ValidationException, ResponseValidationError
 
-from account.dependencies.user import get_user_service
-from account.schemas import (
+from src.account.dependencies.user import get_user_service
+from src.account.schemas import (
     UserCreateSchema,
     UserResponseSchema,
     UserUpdateSchema,
     UserPartialUpdateSchema,
 )
-from account.servicies import UserService
+from src.account.servicies import UserService
 
 router = APIRouter(prefix="/users", tags=["ACCOUNT/USERS"])
 
@@ -23,7 +23,9 @@ router = APIRouter(prefix="/users", tags=["ACCOUNT/USERS"])
     description="Получение списка пользователей",
 )
 async def get_users_handler(
-    page: int, per_page: int = 10, user_service: UserService = Depends(get_user_service)
+    page: int = 1,
+    per_page: int = 10,
+    user_service: UserService = Depends(get_user_service),
 ):
     offset = (page - 1) * per_page
     return await user_service.get_all(offset=offset, per_page=per_page)

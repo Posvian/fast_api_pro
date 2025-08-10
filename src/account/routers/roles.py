@@ -1,8 +1,8 @@
 from fastapi import APIRouter, status, Depends
 
-from account.dependencies.role import get_role_service
-from account.schemas import RoleCreateSchema, RoleListSchema
-from account.servicies import RoleService
+from src.account.dependencies.role import get_role_service
+from src.account.schemas import RoleCreateSchema, RoleListSchema
+from src.account.servicies import RoleService
 
 router = APIRouter(prefix="/roles", tags=["ACCOUNT/ROLES"], dependencies=[])
 
