@@ -1,7 +1,7 @@
 from fastapi import APIRouter, status, Depends
 
 from src.account.dependencies.role import get_role_service
-from src.account.schemas import RoleCreateSchema, RoleListSchema
+from src.account.schemas import RoleCreateSchema, RoleResponseSchema
 from src.account.servicies import RoleService
 
 router = APIRouter(prefix="/roles", tags=["ACCOUNT/ROLES"], dependencies=[])
@@ -9,12 +9,14 @@ router = APIRouter(prefix="/roles", tags=["ACCOUNT/ROLES"], dependencies=[])
 
 @router.get(
     "/",
-    response_model=list[RoleListSchema],
+    response_model=list[RoleResponseSchema],
     status_code=status.HTTP_200_OK,
     description="Получение списка ролей",
 )
 async def get_roles_handler(
-    page: int, per_page: int = 10, role_service: RoleService = Depends(get_role_service)
+    page: int = 1,
+    per_page: int = 10,
+    role_service: RoleService = Depends(get_role_service),
 ):
     offset = (page - 1) * per_page
     return await role_service.get_all(offset=offset, per_page=per_page)
@@ -22,7 +24,7 @@ async def get_roles_handler(
 
 @router.get(
     "/{role_id}",
-    response_model=RoleListSchema,
+    response_model=RoleResponseSchema,
     status_code=status.HTTP_200_OK,
     description="Получение конкретной роли",
 )
@@ -34,14 +36,14 @@ async def get_role_handler(
 
 @router.post(
     "/",
-    response_model=RoleCreateSchema,
+    response_model=RoleResponseSchema,
     status_code=status.HTTP_201_CREATED,
     description="Создание роли",
 )
 async def create_role_handler(
     payload: RoleCreateSchema,
     role_service: RoleService = Depends(get_role_service),
-):
+) -> RoleResponseSchema:
     return await role_service.create(role_schema=payload)
 
 

@@ -3,7 +3,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
-from .role import RoleListSchema
+from .role import RoleResponseSchema
 
 
 class BaseUserSchema(BaseModel):
@@ -31,7 +31,7 @@ class UserResponseSchema(BaseUserSchema):
     id: int
     is_superuser: bool | None = None
     is_active: bool | None = None
-    role: RoleListSchema | None = None
+    role: RoleResponseSchema | None = None
 
 
 class UserUpdateSchema(BaseModel):

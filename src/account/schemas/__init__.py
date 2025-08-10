@@ -7,5 +7,5 @@ from .users import (
 
 from .role import (
     RoleCreateSchema,
-    RoleListSchema,
+    RoleResponseSchema,
 )

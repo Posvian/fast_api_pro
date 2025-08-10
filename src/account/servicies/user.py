@@ -13,7 +13,7 @@ from src.account.schemas import (
     UserUpdateSchema,
     UserPartialUpdateSchema,
     UserResponseSchema,
-    RoleListSchema,
+    RoleResponseSchema,
 )
 from src.account.models import User
 

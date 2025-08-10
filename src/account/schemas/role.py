@@ -9,6 +9,6 @@ class RoleCreateSchema(BaseRoleSchema):
     pass
 
 
-class RoleListSchema(BaseRoleSchema):
+class RoleResponseSchema(BaseRoleSchema):
     id: int
     name: str
