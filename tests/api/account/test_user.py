@@ -66,15 +66,17 @@ class TestUser:
         create_tables,
         create_test_user,
         async_session,
+        create_test_role,
     ):
+        create_test_user.role = create_test_role
         response = await async_client.get(
             "/api/v1/account/users/",
         )
         assert response.status_code == status.HTTP_200_OK
         data_from_resp = response.json()
-        assert len(data_from_resp) == 1
-        assert data_from_resp[0]["email"] == create_test_user.email
-        assert data_from_resp[0]["first_name"] == create_test_user.first_name
+        assert len(data_from_resp) == 3
+        assert data_from_resp["users"][0]["email"] == create_test_user.email
+        assert data_from_resp["users"][0]["first_name"] == create_test_user.first_name
 
     @pytest.mark.asyncio
     async def test_get_user(

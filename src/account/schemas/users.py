@@ -64,3 +64,9 @@ class UserPartialUpdateSchema(BaseModel):
     first_name: str | None = None
     last_name: str | None = None
     role_id: int | None = None
+
+
+class UserListSchema(BaseModel):
+    users: list[UserResponseSchema]
+    count_of_pages: int
+    count_of_users: int

@@ -3,7 +3,7 @@ from typing import Sequence
 from dns.e164 import query
 from fastapi import HTTPException
 
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
@@ -18,6 +18,11 @@ from src.account.models import User
 class UserRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
+
+    async def count_users(self):
+        query = select(func.count()).select_from(User)
+        result = await self.session.execute(query)
+        return result.scalar()
 
     async def get_all(self, offset: int, per_page: int) -> Sequence[User]:
         query = (

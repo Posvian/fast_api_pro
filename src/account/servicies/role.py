@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.account.models import Role
 from src.account.repositories.role import RoleRepository
-from src.account.schemas import RoleCreateSchema
+from src.account.schemas import RoleCreateSchema, RoleListSchema, RoleResponseSchema
 
 
 class RoleService:
@@ -19,18 +19,26 @@ class RoleService:
                 detail="Такая роль уже существует", status_code=status.HTTP_409_CONFLICT
             )
 
-    async def get_all(self, offset: int, per_page: int) -> Sequence[Role]:
+    async def get_all(self, offset: int, per_page: int) -> RoleListSchema:
         count_of_roles = await self.repository.get_role_count()
         if count_of_roles % per_page == 0:
             count_of_pages = count_of_roles // per_page
         else:
             count_of_pages = count_of_roles // per_page + 1
-        print(count_of_pages)
-        return {
-            "roles": await self.repository.get_all(offset=offset, per_page=per_page),
-            "count_of_pages": count_of_pages,
-            "count_of_roles": count_of_roles,
-        }
+        roles = [
+            RoleResponseSchema(id=role.id, name=role.name)
+            for role in await self.repository.get_all(offset=offset, per_page=per_page)
+        ]
+        return RoleListSchema(
+            roles=roles,
+            count_of_pages=count_of_pages,
+            count_of_roles=count_of_roles,
+        )
+        #     {
+        #     "roles": await self.repository.get_all(offset=offset, per_page=per_page),
+        #     "count_of_pages": count_of_pages,
+        #     "count_of_roles": count_of_roles,
+        # }
 
     async def get_by_id(self, role_id: int) -> Role:
         role = await self.repository.get_by_id(role_id=role_id)

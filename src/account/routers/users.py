@@ -10,6 +10,7 @@ from src.account.schemas import (
     UserResponseSchema,
     UserUpdateSchema,
     UserPartialUpdateSchema,
+    UserListSchema,
 )
 from src.account.servicies import UserService
 
@@ -18,7 +19,7 @@ router = APIRouter(prefix="/users", tags=["ACCOUNT/USERS"])
 
 @router.get(
     "/",
-    response_model=list[UserResponseSchema],
+    response_model=UserListSchema,
     status_code=status.HTTP_200_OK,
     description="Получение списка пользователей",
 )
@@ -26,7 +27,7 @@ async def get_users_handler(
     page: int = 1,
     per_page: int = 10,
     user_service: UserService = Depends(get_user_service),
-):
+) -> UserListSchema:
     offset = (page - 1) * per_page
     return await user_service.get_all(offset=offset, per_page=per_page)
 

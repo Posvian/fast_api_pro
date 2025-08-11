@@ -14,6 +14,7 @@ from src.account.schemas import (
     UserPartialUpdateSchema,
     UserResponseSchema,
     RoleResponseSchema,
+    UserListSchema,
 )
 from src.account.models import User
 
@@ -23,8 +24,29 @@ class UserService:
         self.session = session
         self.repository = UserRepository(session=session)
 
-    async def get_all(self, offset: int, per_page: int) -> Sequence[User]:
-        return await self.repository.get_all(offset=offset, per_page=per_page)
+    async def get_all(self, offset: int, per_page: int) -> UserListSchema:
+        count_of_users = await self.repository.count_users()
+        if count_of_users % per_page == 0:
+            count_of_pages = count_of_users // per_page
+        else:
+            count_of_pages = count_of_users // per_page + 1
+        users = [
+            UserResponseSchema(
+                id=user.id,
+                email=user.email,
+                first_name=user.first_name,
+                last_name=user.last_name,
+                is_superuser=user.is_superuser,
+                is_active=user.is_active,
+                role=RoleResponseSchema(id=user.role_id, name=user.role.name),
+            )
+            for user in await self.repository.get_all(offset=offset, per_page=per_page)
+        ]
+        return UserListSchema(
+            users=users,
+            count_of_users=count_of_users,
+            count_of_pages=count_of_pages,
+        )
 
     async def check_exist(self, email):
         if await self.repository.get_by_email(email=email):
