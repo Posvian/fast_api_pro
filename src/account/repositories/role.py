@@ -1,7 +1,8 @@
 from typing import Sequence
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
+from sqlalchemy.sql.functions import count
 
 from src.account.models import Role
 from src.account.schemas import RoleCreateSchema
@@ -10,6 +11,11 @@ from src.account.schemas import RoleCreateSchema
 class RoleRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
+
+    async def get_role_count(self):
+        query = select(func.count()).select_from(Role)
+        result = await self.session.execute(query)
+        return result.scalar()
 
     async def get_all(self, offset: int, per_page: int) -> Sequence[Role]:
         query = select(Role).offset(offset).limit(per_page)

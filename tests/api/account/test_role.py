@@ -15,8 +15,10 @@ class TestRole:
         response = await async_client.get("/api/v1/account/roles/")
         assert response.status_code == status.HTTP_200_OK
         data_from_resp = response.json()
-        assert len(data_from_resp) == 1
-        assert data_from_resp[0]["name"] == create_test_role.name
+        assert len(data_from_resp) == 3
+        assert data_from_resp["count_of_pages"] == 1
+        assert data_from_resp["count_of_roles"] == 1
+        assert data_from_resp["roles"][0]["name"] == create_test_role.name
 
     @pytest.mark.asyncio
     async def test_get_role(

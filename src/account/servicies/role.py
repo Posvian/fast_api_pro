@@ -20,7 +20,17 @@ class RoleService:
             )
 
     async def get_all(self, offset: int, per_page: int) -> Sequence[Role]:
-        return await self.repository.get_all(offset=offset, per_page=per_page)
+        count_of_roles = await self.repository.get_role_count()
+        if count_of_roles % per_page == 0:
+            count_of_pages = count_of_roles // per_page
+        else:
+            count_of_pages = count_of_roles // per_page + 1
+        print(count_of_pages)
+        return {
+            "roles": await self.repository.get_all(offset=offset, per_page=per_page),
+            "count_of_pages": count_of_pages,
+            "count_of_roles": count_of_roles,
+        }
 
     async def get_by_id(self, role_id: int) -> Role:
         role = await self.repository.get_by_id(role_id=role_id)

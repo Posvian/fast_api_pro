@@ -9,7 +9,7 @@ router = APIRouter(prefix="/roles", tags=["ACCOUNT/ROLES"], dependencies=[])
 
 @router.get(
     "/",
-    response_model=list[RoleResponseSchema],
+    response_model=None,
     status_code=status.HTTP_200_OK,
     description="Получение списка ролей",
 )
@@ -17,7 +17,7 @@ async def get_roles_handler(
     page: int = 1,
     per_page: int = 10,
     role_service: RoleService = Depends(get_role_service),
-):
+) -> [[RoleResponseSchema], int, int]:
     offset = (page - 1) * per_page
     return await role_service.get_all(offset=offset, per_page=per_page)
 
