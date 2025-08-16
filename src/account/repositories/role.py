@@ -17,8 +17,12 @@ class RoleRepository:
         result = await self.session.execute(query)
         return result.scalar()
 
-    async def get_all(self, offset: int, per_page: int) -> Sequence[Role]:
+    async def get_all(
+        self, offset: int, per_page: int, name__ilike: str
+    ) -> Sequence[Role]:
         query = select(Role).offset(offset).limit(per_page)
+        if name__ilike:
+            query = query.filter(Role.name.ilike(f"%{name__ilike}%"))
         result = await self.session.execute(query)
         return result.scalars().all()
 

@@ -18,3 +18,8 @@ class RoleListSchema(BaseModel):
     roles: list[RoleResponseSchema]
     count_of_pages: int
     count_of_roles: int
+
+
+class RoleFilter(BaseModel):
+    id__in: list[str] | None = None
+    name__like: str | None = None

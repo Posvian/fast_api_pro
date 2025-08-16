@@ -19,7 +19,9 @@ class RoleService:
                 detail="Такая роль уже существует", status_code=status.HTTP_409_CONFLICT
             )
 
-    async def get_all(self, offset: int, per_page: int) -> RoleListSchema:
+    async def get_all(
+        self, offset: int, per_page: int, name__ilike: str
+    ) -> RoleListSchema:
         count_of_roles = await self.repository.get_role_count()
         if count_of_roles % per_page == 0:
             count_of_pages = count_of_roles // per_page
@@ -27,7 +29,9 @@ class RoleService:
             count_of_pages = count_of_roles // per_page + 1
         roles = [
             RoleResponseSchema(id=role.id, name=role.name)
-            for role in await self.repository.get_all(offset=offset, per_page=per_page)
+            for role in await self.repository.get_all(
+                offset=offset, per_page=per_page, name__ilike=name__ilike
+            )
         ]
         return RoleListSchema(
             roles=roles,

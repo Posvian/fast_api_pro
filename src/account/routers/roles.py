@@ -1,5 +1,6 @@
 from fastapi import APIRouter, status, Depends
 
+
 from src.account.dependencies.role import get_role_service
 from src.account.schemas import RoleCreateSchema, RoleResponseSchema, RoleListSchema
 from src.account.servicies import RoleService
@@ -14,12 +15,15 @@ router = APIRouter(prefix="/roles", tags=["ACCOUNT/ROLES"], dependencies=[])
     description="Получение списка ролей",
 )
 async def get_roles_handler(
+    name__ilike: str = None,
     page: int = 1,
     per_page: int = 10,
     role_service: RoleService = Depends(get_role_service),
 ) -> RoleListSchema:
     offset = (page - 1) * per_page
-    return await role_service.get_all(offset=offset, per_page=per_page)
+    return await role_service.get_all(
+        offset=offset, per_page=per_page, name__ilike=name__ilike
+    )
 
 
 @router.get(
