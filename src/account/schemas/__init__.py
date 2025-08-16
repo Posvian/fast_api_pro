@@ -4,6 +4,7 @@ from .users import (
     UserUpdateSchema,
     UserPartialUpdateSchema,
     UserListSchema,
+    UserFilter,
 )
 
 from .role import (

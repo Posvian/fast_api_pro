@@ -2,9 +2,11 @@ import re
 from datetime import datetime
 
 from fastapi import HTTPException
+from fastapi_filter.contrib.sqlalchemy import Filter
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
 from .role import RoleResponseSchema
+from src.account.models.user import User
 
 
 NAME_SURNAME_PATTERN = re.compile(r"^[а-яА-Яa-zA-Z\-]+$")
@@ -70,3 +72,12 @@ class UserListSchema(BaseModel):
     users: list[UserResponseSchema]
     count_of_pages: int
     count_of_users: int
+
+
+class UserFilter(Filter):
+    first_name__in: list[str] | None = None
+    last_name__in: list[str] | None = None
+    email__like: str | None = None
+
+    class Constants(Filter.Constants):
+        model = User
