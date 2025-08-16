@@ -15,6 +15,7 @@ from src.account.schemas import (
     UserResponseSchema,
     RoleResponseSchema,
     UserListSchema,
+    UserFilter,
 )
 from src.account.models import User
 
@@ -24,7 +25,9 @@ class UserService:
         self.session = session
         self.repository = UserRepository(session=session)
 
-    async def get_all(self, offset: int, per_page: int) -> UserListSchema:
+    async def get_all(
+        self, offset: int, per_page: int, user_filter: UserFilter
+    ) -> UserListSchema:
         count_of_users = await self.repository.count_users()
         if count_of_users % per_page == 0:
             count_of_pages = count_of_users // per_page
@@ -38,9 +41,15 @@ class UserService:
                 last_name=user.last_name,
                 is_superuser=user.is_superuser,
                 is_active=user.is_active,
-                role=RoleResponseSchema(id=user.role_id, name=user.role.name),
+                role=(
+                    RoleResponseSchema(id=user.role_id, name=user.role.name)
+                    if user.role is not None
+                    else None
+                ),
             )
-            for user in await self.repository.get_all(offset=offset, per_page=per_page)
+            for user in await self.repository.get_all(
+                offset=offset, per_page=per_page, user_filter=user_filter
+            )
         ]
         return UserListSchema(
             users=users,

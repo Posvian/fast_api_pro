@@ -3,7 +3,7 @@ from typing import Sequence
 from dns.e164 import query
 from fastapi import HTTPException
 
-from sqlalchemy import select, func
+from sqlalchemy import select, func, Select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
@@ -11,6 +11,7 @@ from src.account.schemas import (
     UserCreateSchema,
     UserUpdateSchema,
     UserPartialUpdateSchema,
+    UserFilter,
 )
 from src.account.models import User
 
@@ -24,7 +25,9 @@ class UserRepository:
         result = await self.session.execute(query)
         return result.scalar()
 
-    async def get_all(self, offset: int, per_page: int) -> Sequence[User]:
+    async def get_all(
+        self, offset: int, per_page: int, user_filter: UserFilter
+    ) -> Sequence[User]:
         query = (
             select(User)
             .options(joinedload(User.role))
@@ -32,7 +35,8 @@ class UserRepository:
             .limit(per_page)
             .order_by(User.id)
         )
-        result = await self.session.execute(query)
+        query_filter = user_filter.filter(query=query)
+        result = await self.session.execute(query_filter)
         return result.scalars().all()
 
     async def get_by_email(self, email) -> User | None:
