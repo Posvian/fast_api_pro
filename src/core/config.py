@@ -6,6 +6,12 @@ from pydantic_settings import BaseSettings
 load_dotenv(".env")
 
 
+class AuthSettings(BaseSettings):
+    secret_key: str = os.environ.get("SECRET_KEY")
+    algorithm: str = os.environ.get("ALGORITHM")
+    expire_time: int = os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES")
+
+
 class DBSettings(BaseSettings):
     port: int = os.environ.get("DB_PORT")
     host: str = os.environ.get("DB_HOST")
@@ -21,6 +27,7 @@ class DBSettings(BaseSettings):
 
 class Settings:
     db: DBSettings = DBSettings()
+    auth: AuthSettings = AuthSettings()
 
 
 settings = Settings()
