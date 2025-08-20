@@ -7,6 +7,7 @@ from sqlalchemy import select, func, Select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
+from src.authentication.schemas.auth import AuthSchema
 from src.account.schemas import (
     UserCreateSchema,
     UserUpdateSchema,
@@ -49,14 +50,8 @@ class UserRepository:
         result = await self.session.execute(query)
         return result.scalars().one_or_none()
 
-    async def create(self, user_schema: UserCreateSchema) -> User:
-        user = User(
-            email=user_schema.email,
-            first_name=user_schema.first_name,
-            last_name=user_schema.last_name,
-            password=user_schema.password,
-            role_id=user_schema.role_id,
-        )
+    async def create(self, user_schema: UserCreateSchema | AuthSchema) -> User:
+        user = User(**user_schema.__dict__)
         self.session.add(user)
         await self.session.commit()
         await self.session.flush()
