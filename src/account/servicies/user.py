@@ -5,8 +5,11 @@ from dns.rdata import Rdata
 from fastapi import HTTPException, status
 
 from fastapi.exceptions import ValidationException
+from pydantic import EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.authentication.services.auth import AuthenticationService
+from src.authentication.schemas.auth import AuthSchema
 from src.account.repositories.user import UserRepository
 from src.account.schemas import (
     UserCreateSchema,
@@ -18,12 +21,14 @@ from src.account.schemas import (
     UserFilter,
 )
 from src.account.models import User
+from src.core.constants import credentials_exception
 
 
 class UserService:
     def __init__(self, session: AsyncSession):
         self.session = session
         self.repository = UserRepository(session=session)
+        self.auth_service = AuthenticationService(session=session)
 
     async def get_all(
         self, offset: int, per_page: int, user_filter: UserFilter
@@ -64,8 +69,11 @@ class UserService:
                 status_code=status.HTTP_409_CONFLICT,
             )
 
-    async def create(self, user_schema: UserCreateSchema):
+    async def create(self, user_schema: UserCreateSchema | AuthSchema):
         await self.check_exist(email=user_schema.email)
+        user_schema.password = await self.auth_service.get_password_hash(
+            password=user_schema.password
+        )
         user = await self.repository.create(user_schema=user_schema)
         return user
 
@@ -76,6 +84,12 @@ class UserService:
                 detail="Такого пользователя не существует",
                 status_code=status.HTTP_404_NOT_FOUND,
             )
+        return user
+
+    async def get_by_email(self, email: EmailStr) -> User:
+        user = await self.repository.get_by_email(email=email)
+        if not user:
+            raise credentials_exception
         return user
 
     async def update_user(self, user_id: int, user_schema: UserUpdateSchema):
