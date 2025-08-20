@@ -10,6 +10,7 @@ class AuthSettings(BaseSettings):
     secret_key: str = os.environ.get("SECRET_KEY")
     algorithm: str = os.environ.get("ALGORITHM")
     expire_time: int = os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES")
+    scheme: str = os.environ.get("SCHEME")
 
 
 class DBSettings(BaseSettings):
