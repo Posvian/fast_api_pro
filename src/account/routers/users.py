@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from fastapi.exceptions import ValidationException, ResponseValidationError
 from fastapi_filter import FilterDepends
 
-from src.account.dependencies.user import get_user_service
+from src.account.dependencies.user import get_user_service, get_user_filters
 from src.account.schemas import (
     UserCreateSchema,
     UserResponseSchema,
@@ -29,11 +29,11 @@ async def get_users_handler(
     page: int = 1,
     per_page: int = 10,
     user_service: UserService = Depends(get_user_service),
-    user_filter: UserFilter = FilterDepends(UserFilter),
+    filter_data: dict = Depends(get_user_filters),
 ) -> UserListSchema:
     offset = (page - 1) * per_page
     return await user_service.get_all(
-        offset=offset, per_page=per_page, user_filter=user_filter
+        offset=offset, per_page=per_page, filter_data=filter_data
     )
 
 

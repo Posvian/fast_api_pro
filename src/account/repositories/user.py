@@ -7,6 +7,7 @@ from sqlalchemy import select, func, Select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
+from src.core.filters import UserFilterSet
 from src.authentication.schemas.auth import AuthSchema
 from src.account.schemas import (
     UserCreateSchema,
@@ -27,7 +28,7 @@ class UserRepository:
         return result.scalar()
 
     async def get_all(
-        self, offset: int, per_page: int, user_filter: UserFilter
+        self, offset: int, per_page: int, filter_data: dict
     ) -> Sequence[User]:
         query = (
             select(User)
@@ -36,8 +37,9 @@ class UserRepository:
             .limit(per_page)
             .order_by(User.id)
         )
-        query_filter = user_filter.filter(query=query)
-        result = await self.session.execute(query_filter)
+        user_filter = UserFilterSet(data=filter_data, query=query, model=User)
+        filtered_query = user_filter.qs
+        result = await self.session.execute(filtered_query)
         return result.scalars().all()
 
     async def get_by_email(self, email) -> User | None:

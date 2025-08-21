@@ -31,7 +31,7 @@ class UserService:
         self.auth_service = AuthenticationService(session=session)
 
     async def get_all(
-        self, offset: int, per_page: int, user_filter: UserFilter
+        self, offset: int, per_page: int, filter_data: dict
     ) -> UserListSchema:
         count_of_users = await self.repository.count_users()
         if count_of_users % per_page == 0:
@@ -53,7 +53,7 @@ class UserService:
                 ),
             )
             for user in await self.repository.get_all(
-                offset=offset, per_page=per_page, user_filter=user_filter
+                offset=offset, per_page=per_page, filter_data=filter_data
             )
         ]
         return UserListSchema(
