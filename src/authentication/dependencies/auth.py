@@ -1,13 +1,45 @@
-from fastapi import Depends
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
+from jwt import InvalidTokenError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.account.dependencies.user import get_user_service
+from src.account.servicies import UserService
 from src.account.schemas import UserResponseSchema
+from src.account.models.user import User
 from src.authentication.services.auth import AuthenticationService
 from src.core.orm.db import get_async_session
+from src.core.constants import credentials_exception
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="v1/authentication/jwt/token")
 
 
 async def get_auth_service(session: AsyncSession = Depends(get_async_session)):
     return AuthenticationService(session=session)
+
+
+async def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    auth_service: AuthenticationService = Depends(get_auth_service),
+    user_service: UserService = Depends(get_user_service),
+) -> User:
+    try:
+        payload = await auth_service.decode_jwt(token=token)
+        email = payload.get("email")
+        if email is None:
+            raise credentials_exception
+    except InvalidTokenError:
+        raise credentials_exception
+
+    user = await user_service.get_by_email(email=email)
+    return user
+
+
+async def get_current_active_user(
+    current_user: User = Depends(get_current_user),
+) -> User:
+    if not current_user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user"
+        )
+    return current_user
