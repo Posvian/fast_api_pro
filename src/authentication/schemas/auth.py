@@ -9,3 +9,9 @@ class Token(BaseModel):
 class AuthSchema(BaseModel):
     email: EmailStr
     password: str
+
+
+class User(BaseModel):
+    email: EmailStr
+    first_name: str | None = None
+    last_name: str | None = None
