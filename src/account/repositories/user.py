@@ -81,5 +81,5 @@ class UserRepository:
         return user
 
     async def delete(self, user: User) -> None:
-        await self.session.delete(user)
+        user.is_active = False
         await self.session.commit()

@@ -129,8 +129,11 @@ class TestUser:
         create_tables,
         create_test_user,
         async_session,
+        get_user_from_database,
     ):
         response = await async_client.delete(
             f"/api/v1/account/users/{create_test_user.id}"
         )
         assert response.status_code == status.HTTP_204_NO_CONTENT
+        user_from_db = await get_user_from_database(create_test_user.id)
+        assert user_from_db.is_active == False
