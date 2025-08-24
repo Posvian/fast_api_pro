@@ -2,7 +2,7 @@ from enum import Enum
 from pydantic import BaseModel
 
 
-class ExceptionType(str, Enum):
+class ExceptionTypeEnum(str, Enum):
     USER = "USER"
     SERVER = "SERVER"
     VALIDATION = "VALIDATION"
@@ -14,7 +14,7 @@ class ErrorDetail(BaseModel):
     value: str | None = None
 
 
-class ErrorSchema(BaseModel):
-    exception_tipe: ExceptionType
+class ErrorResponseSchema(BaseModel):
+    exception_type: ExceptionTypeEnum
     status_code: int
     description: list[ErrorDetail]
