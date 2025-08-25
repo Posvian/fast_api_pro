@@ -22,6 +22,7 @@ from src.account.schemas import (
 )
 from src.account.models import User
 from src.core.constants import credentials_exception
+from src.exceptions.services.exception_service import ExceptionService
 
 
 class UserService:
@@ -29,6 +30,7 @@ class UserService:
         self.session = session
         self.repository = UserRepository(session=session)
         self.auth_service = AuthenticationService(session=session)
+        self.exception_service = ExceptionService()
 
     async def get_all(
         self, offset: int, per_page: int, filter_data: dict
@@ -64,10 +66,15 @@ class UserService:
 
     async def check_exist(self, email):
         if await self.repository.get_by_email(email=email):
-            raise HTTPException(
-                detail="Пользователь с таким майлом уже существует",
-                status_code=status.HTTP_409_CONFLICT,
+            ExceptionService.user_error(
+                message="Email already exists",
+                details="A user with this email address is already registered",
+                value=email,
             )
+            # raise HTTPException(
+            #     detail="Пользователь с таким майлом уже существует",
+            #     status_code=status.HTTP_409_CONFLICT,
+            # )
 
     async def create(self, user_schema: UserCreateSchema | AuthSchema):
         await self.check_exist(email=user_schema.email)
