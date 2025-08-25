@@ -18,7 +18,9 @@ class BaseUserSchema(BaseModel):
     last_name: str
 
     @field_validator("first_name")
-    def validate_first_name(cls, value) -> str:
+    def validate_first_name(cls, value) -> str | None:
+        if value is None:
+            return value
         if not NAME_SURNAME_PATTERN.match(value):
             raise HTTPException(
                 status_code=422, detail="Имя должно состоять только из букв"
@@ -26,7 +28,9 @@ class BaseUserSchema(BaseModel):
         return value
 
     @field_validator("last_name")
-    def validate_last_name(cls, value) -> str:
+    def validate_last_name(cls, value) -> str | None:
+        if value is None:
+            return value
         if not NAME_SURNAME_PATTERN.match(value):
             raise HTTPException(
                 status_code=422, detail="Фамилия должна состоять только из букв"
@@ -51,6 +55,8 @@ class UserCreateSchema(BaseUserSchema):
 
 class UserResponseSchema(BaseUserSchema):
     id: int
+    first_name: str | None = None
+    last_name: str | None = None
     is_superuser: bool | None = None
     is_active: bool | None = None
     role: RoleResponseSchema | None = None
