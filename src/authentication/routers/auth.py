@@ -38,8 +38,12 @@ async def login(
     if not user:
         raise credentials_exception
     data = AuthSchema(email=form_data.username, password=form_data.password)
-    access_token = await auth_service.encode_token(data=data)
-    return Token(access_token=access_token, token_type="bearer")
+    token_data = await auth_service.token_data(data=data)
+    return Token(
+        access_token=token_data["access_token"],
+        token_type="bearer",
+        refresh_token=token_data["refresh_token"],
+    )
 
 
 @router.post("/register")
@@ -47,7 +51,11 @@ async def register_user_handler(
     data: AuthSchema,
     user_service: UserService = Depends(get_user_service),
     auth_service: AuthenticationService = Depends(get_auth_service),
-) -> str:
-    token = await auth_service.encode_token(data=data)
+) -> Token:
+    token_data = await auth_service.token_data(data=data)
     await user_service.create(user_schema=data)
-    return token
+    return Token(
+        access_token=token_data["access_token"],
+        token_type="bearer",
+        refresh_token=token_data["refresh_token"],
+    )

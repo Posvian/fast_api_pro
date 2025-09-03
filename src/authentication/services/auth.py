@@ -21,24 +21,56 @@ class AuthenticationService:
             schemes=[settings.auth.scheme], deprecated="auto"
         )
 
-    async def encode_token(self, data: AuthSchema):
+    async def create_jwt_token(
+        self, data: AuthSchema, expires_delta: timedelta, token_type: str | None = None
+    ):
         payload = {"email": data.email}
-        expire = datetime.now(timezone.utc) + timedelta(
-            minutes=settings.auth.expire_time
-        )
+        expire = datetime.now(timezone.utc) + expires_delta
         payload.update({"exp": expire})
-        encoded_jwt = jwt.encode(
+        if token_type:
+            payload.update({"type": token_type})
+        return jwt.encode(
             payload=payload,
             key=settings.auth.secret_key,
             algorithm=settings.auth.algorithm,
         )
-        return encoded_jwt
+
+    async def encode_access_token(self, data: AuthSchema):
+        return await self.create_jwt_token(
+            data=data,
+            expires_delta=timedelta(minutes=settings.auth.expire_time),
+            token_type="access",
+        )
+
+    async def encode_refresh_token(self, data: AuthSchema):
+        return await self.create_jwt_token(
+            data=data,
+            expires_delta=timedelta(days=settings.auth.refresh_token_expire),
+            token_type="refresh",
+        )
+
+    async def token_data(self, data: AuthSchema):
+        access_token = await self.encode_access_token(data=data)
+        refresh_token = await self.encode_refresh_token(data=data)
+        return {"access_token": access_token, "refresh_token": refresh_token}
 
     async def decode_jwt(self, token: str):
         payload = jwt.decode(
             token, key=settings.auth.secret_key, algorithms=[settings.auth.algorithm]
         )
+        exp = payload["exp"]
+        await self.check_token_expire(exp=exp)
         return payload
+
+    @staticmethod
+    async def check_token_expire(exp):
+        if datetime.fromtimestamp(float(exp)) - datetime.now() < timedelta(0):
+            raise credentials_exception
+
+    # todo veryfi_token_expire +
+    # todo refresh_token +
+    # todo получение ассес токена через рефреш токен
+    # todo прокидование ассес токена в куки и получение из куки
 
     async def get_password_hash(self, password: str) -> str:
         return self.pwd_context.hash(password)
