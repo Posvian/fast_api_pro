@@ -1,10 +1,8 @@
 from datetime import datetime, timezone, timedelta
 
 import jwt
-from fastapi import Depends
 from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.testing.provision import run_reap_dbs
 
 from src.authentication.schemas.auth import AuthSchema
 from src.account.models.user import User
@@ -70,7 +68,6 @@ class AuthenticationService:
     # todo veryfi_token_expire +
     # todo refresh_token +
     # todo получение ассес токена через рефреш токен
-    # todo прокидование ассес токена в куки и получение из куки
 
     async def get_password_hash(self, password: str) -> str:
         return self.pwd_context.hash(password)

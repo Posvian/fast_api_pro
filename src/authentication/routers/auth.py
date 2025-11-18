@@ -17,8 +17,6 @@ from src.authentication.dependencies.auth import get_current_active_user
 
 router = APIRouter(prefix="/jwt", tags=["AUTHENTICATION"])
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="v1/authentication/jwt/token")
-
 
 @router.get("/me", response_model=User)
 async def get_me_handler(
@@ -29,15 +27,15 @@ async def get_me_handler(
 
 @router.post("/token")
 async def login(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    data: AuthSchema,
     auth_service: AuthenticationService = Depends(get_auth_service),
 ) -> Token:
     user = await auth_service.authenticate_user(
-        email=form_data.username, password=form_data.password
+        email=data.email, password=data.password
     )
     if not user:
         raise credentials_exception
-    data = AuthSchema(email=form_data.username, password=form_data.password)
+    data = AuthSchema(email=data.email, password=data.password)
     token_data = await auth_service.token_data(data=data)
     return Token(
         access_token=token_data["access_token"],

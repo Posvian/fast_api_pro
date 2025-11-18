@@ -1,5 +1,5 @@
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jwt import InvalidTokenError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,7 +11,7 @@ from src.authentication.services.auth import AuthenticationService
 from src.core.orm.db import get_async_session
 from src.core.constants import credentials_exception
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="v1/authentication/jwt/token")
+bearer_scheme = HTTPBearer()
 
 
 async def get_auth_service(session: AsyncSession = Depends(get_async_session)):
@@ -19,10 +19,12 @@ async def get_auth_service(session: AsyncSession = Depends(get_async_session)):
 
 
 async def get_current_user(
-    token: str = Depends(oauth2_scheme),
+    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
     auth_service: AuthenticationService = Depends(get_auth_service),
     user_service: UserService = Depends(get_user_service),
 ) -> User:
+
+    token = credentials.credentials
     try:
         payload = await auth_service.decode_jwt(token=token)
         email = payload.get("email")
