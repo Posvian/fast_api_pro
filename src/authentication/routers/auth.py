@@ -41,7 +41,6 @@ async def login(
     token_data = await auth_service.token_data(data=data)
     return Token(
         access_token=token_data["access_token"],
-        token_type="bearer",
         refresh_token=token_data["refresh_token"],
     )
 
@@ -56,6 +55,5 @@ async def register_user_handler(
     await user_service.create(user_schema=data)
     return Token(
         access_token=token_data["access_token"],
-        token_type="bearer",
         refresh_token=token_data["refresh_token"],
     )
