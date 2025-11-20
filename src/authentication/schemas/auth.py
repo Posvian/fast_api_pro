@@ -15,3 +15,7 @@ class User(BaseModel):
     email: EmailStr
     first_name: str | None = None
     last_name: str | None = None
+
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str

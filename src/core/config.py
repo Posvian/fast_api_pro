@@ -8,6 +8,7 @@ load_dotenv(".env")
 
 class AuthSettings(BaseSettings):
     secret_key: str = os.environ.get("SECRET_KEY")
+    refresh_secret_key: str = os.environ.get("REFRESH_SECRET_KEY")
     algorithm: str = os.environ.get("ALGORITHM")
     expire_time: int = os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES")
     scheme: str = os.environ.get("SCHEME")
