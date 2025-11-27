@@ -83,3 +83,8 @@ class UserRepository:
     async def delete(self, user: User) -> None:
         user.is_active = False
         await self.session.commit()
+
+    async def get_superuser(self):
+        query = select(User).where(User.is_superuser == True)
+        result = await self.session.execute(query)
+        return result.scalars().one_or_none()
