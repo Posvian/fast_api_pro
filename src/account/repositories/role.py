@@ -2,8 +2,10 @@ from typing import Sequence
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
+from sqlalchemy.orm import selectinload
 from sqlalchemy.sql.functions import count
 
+from src.permissions.models import PermissionRoleAssociation
 from src.account.models import Role
 from src.account.schemas import RoleCreateSchema
 
@@ -50,3 +52,16 @@ class RoleRepository:
     async def delete(self, role: Role):
         await self.session.delete(role)
         await self.session.commit()
+
+    async def get_by_name_with_permissions(self, name: str):
+        query = (
+            select(Role)
+            .where(Role.name == "admin")
+            .options(
+                selectinload(Role.permission_associations).selectinload(
+                    PermissionRoleAssociation.permission
+                )
+            )
+        )
+        result = await self.session.execute(query)
+        return result.scalars().first()

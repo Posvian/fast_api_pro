@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from src.core.orm.db import async_session_maker
 from src.core.router import router
 from src.core.init_admin import init_admin_user
+from src.core.init_permissions import init_permissions
 from src.exceptions.exception_handlers import ExceptionHandlerManager
 
 
@@ -11,6 +12,7 @@ from src.exceptions.exception_handlers import ExceptionHandlerManager
 async def lifespan(app: FastAPI):
     async with async_session_maker() as session:
         await init_admin_user(session=session)
+        await init_permissions(session=session)
 
     yield
 
