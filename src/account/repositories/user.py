@@ -1,9 +1,6 @@
 from typing import Sequence
 
-from dns.e164 import query
-from fastapi import HTTPException
-
-from sqlalchemy import select, func, Select
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 

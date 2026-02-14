@@ -4,7 +4,6 @@ import jwt
 from jwt import InvalidTokenError
 from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
-from watchfiles import awatch
 
 from src.authentication.schemas.auth import AuthSchema
 from src.account.models.user import User
