@@ -1,6 +1,9 @@
 import pytest
 from fastapi import status, HTTPException
 from fastapi_pagination import response
+from sqlalchemy import select
+
+from src.account.models import Role
 
 
 class TestRole:
@@ -11,13 +14,19 @@ class TestRole:
         create_tables,
         create_test_role,
         async_session,
+        auth_headers_with_all_permissions,
     ):
-        response = await async_client.get("/api/v1/account/roles/")
+        headers = auth_headers_with_all_permissions
+        response = await async_client.get("/api/v1/account/roles/", headers=headers)
         assert response.status_code == status.HTTP_200_OK
         data_from_resp = response.json()
+
+        result = await async_session.execute(select(Role))
+        roles_in_db = result.scalars().all()
+
         assert len(data_from_resp) == 3
         assert data_from_resp["count_of_pages"] == 1
-        assert data_from_resp["count_of_roles"] == 1
+        assert data_from_resp["count_of_roles"] == len(roles_in_db)
         assert data_from_resp["roles"][0]["name"] == create_test_role.name
 
     @pytest.mark.asyncio

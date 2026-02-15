@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status, Depends
 
-
+from src.authentication.dependencies.auth import require_permission
 from src.account.dependencies.role import get_role_service
 from src.account.schemas import RoleCreateSchema, RoleResponseSchema, RoleListSchema
 from src.account.servicies import RoleService
@@ -19,6 +19,7 @@ async def get_roles_handler(
     page: int = 1,
     per_page: int = 10,
     role_service: RoleService = Depends(get_role_service),
+    _: None = Depends(require_permission("view_role")),
 ) -> RoleListSchema:
     offset = (page - 1) * per_page
     return await role_service.get_all(

@@ -8,3 +8,4 @@ class PermissionEnum(StrEnum):
     CREATE_ROLE = "create_role"
     DELETE_ROLE = "delete_role"
     UPDATE_ROLE = "update_role"
+    VIEW_ROLE = "view_role"
