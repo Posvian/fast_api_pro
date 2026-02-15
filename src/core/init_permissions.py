@@ -1,19 +1,10 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.core.permissions import PermissionEnum
 from src.permissions.models import PermissionRoleAssociation
 from src.account.repositories.role import RoleRepository
 from src.permissions.models import Permissions
 from src.permissions.repositories import PermissionRepository
-
-ALL_PERMISSIONS = [
-    "user:create",
-    "user:read",
-    "user:update",
-    "user:delete",
-    "role:read",
-    "role:update",
-    "role:delete",
-]
 
 
 async def init_permissions(session: AsyncSession):
@@ -22,16 +13,12 @@ async def init_permissions(session: AsyncSession):
     permissions_in_db = await permission_repository.get_all_permissions()
 
     permissions_in_db_names = {permission.name for permission in permissions_in_db}
+    actual_permissions = {permission.value for permission in PermissionEnum}
 
-    new_permission_names = set(ALL_PERMISSIONS) - permissions_in_db_names
-    extra_permission_names = permissions_in_db_names - set(ALL_PERMISSIONS)
+    new_permission_names = actual_permissions - permissions_in_db_names
 
     for name in new_permission_names:
         session.add(Permissions(name=name))
-
-    for permission in permissions_in_db:
-        if permission.name in extra_permission_names:
-            await session.delete(permission)
 
     await session.commit()
 
@@ -49,7 +36,7 @@ async def init_permissions(session: AsyncSession):
         for association in admin_role.permission_associations or []
     }
 
-    for name in ALL_PERMISSIONS:
+    for name in actual_permissions:
         if name not in current_admin_permission_names:
             association = PermissionRoleAssociation(
                 role_id=admin_role.id, permission_id=name_to_permission[name].id
@@ -57,7 +44,7 @@ async def init_permissions(session: AsyncSession):
             session.add(association)
 
     for association in list(admin_role.permission_associations or []):
-        if association.permission.name not in ALL_PERMISSIONS:
+        if association.permission.name not in actual_permissions:
             await session.delete(association)
 
     await session.commit()

@@ -25,6 +25,6 @@ class Permissions(Base):
     __tablename__ = "permissions"
 
     name: Mapped[str_255]
-    role_associations: Mapped[Optional["PermissionRoleAssociation"]] = relationship(
-        back_populates="permission"
+    role_associations: Mapped[list["PermissionRoleAssociation"]] = relationship(
+        back_populates="permission", cascade="all, delete-orphan"
     )
