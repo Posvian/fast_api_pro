@@ -40,7 +40,27 @@ async def get_users_handler(
 @router.get(
     "/{user_id}",
     response_model=UserResponseSchema,
-    description="Получение пользователя",
+    description="Get user by id",
+    responses={
+        200: {
+            "description": "Successful response",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "id": 1,
+                        "email": "<EMAIL>",
+                        "first_name": "John",
+                        "last_name": "Doe",
+                        "role": {
+                            "id": 1,
+                            "name": "admin",
+                        },
+                    }
+                }
+            },
+        },
+        403: {"description": "Forbidden"},
+    },
 )
 async def get_user_by_id_handler(
     user_id: int, user_service: UserService = Depends(get_user_service)

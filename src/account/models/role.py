@@ -17,6 +17,6 @@ class Role(Base):
 
     name: Mapped[str_255_unique]
     users: Mapped[Optional[list["User"]]] = relationship(back_populates="role")
-    permission_associations: Mapped[Optional["PermissionRoleAssociation"]] = (
-        relationship(back_populates="role")
+    permission_associations: Mapped[list["PermissionRoleAssociation"]] = relationship(
+        back_populates="role", cascade="all, delete-orphan"
     )

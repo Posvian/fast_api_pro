@@ -1,10 +1,9 @@
 from datetime import datetime, timezone, timedelta
 
 import jwt
-from fastapi import Depends
+from jwt import InvalidTokenError
 from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.testing.provision import run_reap_dbs
 
 from src.authentication.schemas.auth import AuthSchema
 from src.account.models.user import User
@@ -24,11 +23,11 @@ class AuthenticationService:
     async def create_jwt_token(
         self, data: AuthSchema, expires_delta: timedelta, token_type: str | None = None
     ):
-        payload = {"email": data.email}
-        expire = datetime.now(timezone.utc) + expires_delta
-        payload.update({"exp": expire})
-        if token_type:
-            payload.update({"type": token_type})
+        payload = {
+            "email": data.email,
+            "type": token_type,
+            "exp": datetime.now(timezone.utc) + expires_delta,
+        }
         return jwt.encode(
             payload=payload,
             key=settings.auth.secret_key,
@@ -54,23 +53,37 @@ class AuthenticationService:
         refresh_token = await self.encode_refresh_token(data=data)
         return {"access_token": access_token, "refresh_token": refresh_token}
 
-    async def decode_jwt(self, token: str):
-        payload = jwt.decode(
-            token, key=settings.auth.secret_key, algorithms=[settings.auth.algorithm]
-        )
-        exp = payload["exp"]
+    async def decode_jwt(self, token: str, refresh: bool = False):
+        try:
+            payload = jwt.decode(
+                token,
+                key=settings.auth.secret_key,
+                algorithms=[settings.auth.algorithm],
+                options={"verify_exp": False},
+            )
+        except jwt.ExpiredSignatureError:
+            raise InvalidTokenError("Token expired")
+        except jwt.InvalidTokenError:
+            raise InvalidTokenError("Invalid token")
+
+        exp = payload.get("exp")
+        if exp is None:
+            raise InvalidTokenError("Missing exp claim")
         await self.check_token_expire(exp=exp)
+
+        expected_type = "refresh" if refresh else "access"
+        if payload.get("type") != expected_type:
+            raise InvalidTokenError(f"Wrong token type, expected {expected_type}")
+
         return payload
+
+    async def decode_refresh_jwt(self, token):
+        return await self.decode_jwt(token, refresh=True)
 
     @staticmethod
     async def check_token_expire(exp):
         if datetime.fromtimestamp(float(exp)) - datetime.now() < timedelta(0):
             raise credentials_exception
-
-    # todo veryfi_token_expire +
-    # todo refresh_token +
-    # todo получение ассес токена через рефреш токен
-    # todo прокидование ассес токена в куки и получение из куки
 
     async def get_password_hash(self, password: str) -> str:
         return self.pwd_context.hash(password)

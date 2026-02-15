@@ -8,6 +8,7 @@ load_dotenv(".env")
 
 class AuthSettings(BaseSettings):
     secret_key: str = os.environ.get("SECRET_KEY")
+    refresh_secret_key: str = os.environ.get("REFRESH_SECRET_KEY")
     algorithm: str = os.environ.get("ALGORITHM")
     expire_time: int = os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES")
     scheme: str = os.environ.get("SCHEME")
@@ -27,9 +28,17 @@ class DBSettings(BaseSettings):
     test_db_password: str = os.environ.get("DB_TEST_PASS")
 
 
+class AdminInitSettings(BaseSettings):
+    email: str = os.environ.get("ADMIN_EMAIL")
+    password: str = os.environ.get("ADMIN_PASSWORD")
+    first_name: str = os.environ.get("ADMIN_FIRST_NAME")
+    last_name: str = os.environ.get("ADMIN_LAST_NAME")
+
+
 class Settings:
     db: DBSettings = DBSettings()
     auth: AuthSettings = AuthSettings()
+    admin: AdminInitSettings = AdminInitSettings()
 
 
 settings = Settings()

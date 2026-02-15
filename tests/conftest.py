@@ -4,8 +4,12 @@ import asyncio
 import asyncpg
 
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from tests.fixtures.database import TestDatabase
+
+from src.core.permissions import PermissionEnum
+from src.account.models import Role, User
+from src.permissions.models import Permissions, PermissionRoleAssociation
+from src.authentication.services.auth import AuthenticationService
 
 pytest_plugins = [
     "tests.fixtures.client",
@@ -51,10 +55,29 @@ async def asyncpg_pool():
     pool.close()
 
 
-# @pytest.fixture
-# async def get_user_from_database(asyncpg_pool):
-#     async def get_user_from_database_by_id(user_id: int):
-#         async with asyncpg_pool.acquire() as connection:
-#             return await connection.fetch(SELECT_USER_BY_ID, user_id)
-#
-#     return get_user_from_database_by_id
+@pytest_asyncio.fixture
+async def auth_headers_with_all_permissions(async_client, async_session):
+    role = Role(name="test_role")
+    app_permissions = [
+        Permissions(name=permission.value) for permission in PermissionEnum
+    ]
+    associations = [
+        PermissionRoleAssociation(role=role, permission=permission)
+        for permission in app_permissions
+    ]
+    async_session.add_all([role, *app_permissions, *associations])
+    await async_session.commit()
+
+    auth_service = AuthenticationService(async_session)
+    hashed_password = await auth_service.get_password_hash("test_password")
+    user = User(email="test@test.ru", password=hashed_password, role=role)
+    async_session.add(user)
+    await async_session.commit()
+
+    response = await async_client.post(
+        "/api/v1/authentication/jwt/token",
+        json={"email": "test@test.ru", "password": "test_password"},
+    )
+
+    token = response.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}

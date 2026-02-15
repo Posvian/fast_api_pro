@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from builtins import Exception
-from cgitb import handler
 from typing import Optional
 
 from fastapi import Request, HTTPException, status, FastAPI
